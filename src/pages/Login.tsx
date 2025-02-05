@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Movie from "/images/logo.svg"
 import { Input, LgnButton } from "../styled-components/elementsStyles";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +9,13 @@ import { setEmailErr, setPassErr, setRepPassErr } from "../features/errorsSlice"
 import data from "../../accounts.json"
 // import axios from "axios";
 
+export interface AccountState {
+  id: number,
+  email: string,
+  password: string,
+  bookmarks: string[]
+}
+
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
   const [inputs, setInputs] = useState({
@@ -16,20 +23,29 @@ export default function Login() {
     password: "",
     repeatPassword: ""
   });
+  const [accounts, setAccounts] = useState<AccountState[]>([
+    ...data.accounts.map(account => ({
+      ...account,
+      id: Number(account.id)
+    })),
+    ...JSON.parse(localStorage.getItem("accounts") || "[]").filter((element: AccountState) => 
+      !data.accounts.some(acc => Number(acc.id) === element.id)
+    )
+  ]);
   const dispatch = useDispatch<AppDispatch>();
   const errors = useSelector((store: RootState) => store.errorReducer);
   const navigate = useNavigate();
-  interface AccountState {
-    id: number,
-    email: string,
-    password: string,
-    bookmarks: string[]
-  }
+
+  useEffect(() => {
+    localStorage.setItem("accounts", JSON.stringify(accounts));
+    console.log(accounts);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accounts.length]);
 
   function findUser(email: string): AccountState | null {
     let account: AccountState | null = null;
-    data.accounts.forEach((element) => {
-      if(email.toLowerCase() === element.email.toLowerCase()){
+    accounts.forEach((element) => {
+      if(email.toLowerCase() === element?.email.toLowerCase()){
         account = { ...element, id: Number(element.id) };
       }
     });
@@ -104,14 +120,19 @@ export default function Login() {
       dispatch(setRepPassErr("Not matched"));
       return;
     }
-    dispatch(createUser(Number(data.accounts[data.accounts.length - 1].id) + 1, inputs.email, inputs.password, []));
+    setAccounts([...accounts, {
+      id: accounts[accounts.length - 1].id + 1,
+      email: inputs.email.toLowerCase(),
+      password: inputs.password,
+      bookmarks: []
+    }]);
     // PostData({
     //   id: Number(data.accounts[data.accounts.length - 1].id) + 1,
     //   email: inputs.email.toLowerCase(),
     //   password: inputs.password,
     //   bookmarks: []
     // });
-    navigate("/Home");
+    handlePageChange();
   }
 
   return (

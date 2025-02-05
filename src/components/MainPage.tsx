@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import data from "../data.json"
 import { HeaderFont } from "../styled-components/elementsStyles";
 import { Search } from "../styled-components/sectionsStyles";
@@ -7,11 +7,13 @@ import SingleTrending from "./SingleTrending";
 import SearchIcon from "/images/icon-search.svg"
 import { useSelector } from "react-redux";
 import { RootState } from "../store";
+import { AccountState } from "../pages/Login";
 
 export default function MainPage({list}: {
     list: string,
 }) {
     const account = useSelector((state: RootState) => state.userReducer);
+    const accounts = (): AccountState[] => { return JSON.parse(localStorage.getItem("accounts") || "[]"); }
     const Trendings = data.filter((element) => element.isTrending);
     const showList = data.filter((element) => {
         switch(list){
@@ -26,6 +28,13 @@ export default function MainPage({list}: {
         Series: [...showList.filter((element) => element.category === "TV Series")]
     }
     const [input, setInput] = useState("");
+    useEffect(() => {
+        const updatedAccs = accounts().map((acc: AccountState) => 
+            acc.id === account.id ? {...acc, bookmarks: account.bookmarks} : acc
+        );
+        localStorage.setItem("accounts", JSON.stringify(updatedAccs));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [account.bookmarks]);
     const foundMovies = data.filter((element) => {
         if(input === "")
             return false;
