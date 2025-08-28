@@ -1,9 +1,10 @@
+import React from 'react';
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import Layout from './pages/Layout.tsx'
-import Login from './pages/Login.tsx'
-import Home from './pages/Home.tsx'
+const Home = React.lazy(() => import("./pages/Home.tsx"));
+const Login = React.lazy(() => import('./pages/Login.tsx'));
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import store from './store.ts'
 import { Provider } from 'react-redux'
