@@ -1,8 +1,9 @@
+import React from "react";
 import { useState } from "react"
 import { Header } from "../styled-components/sectionsStyles";
 import Logo from "/images/logo.svg"
 import Avatar from "/images/image-avatar.png"
-import MainPage from "../components/MainPage";
+const MainPage = React.lazy(() => import("../components/MainPage"))
 // import { useEffect } from "react";
 // import { useSelector } from "react-redux";
 // import { RootState } from "../store";
